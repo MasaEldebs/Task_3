@@ -30,6 +30,24 @@ export default function AllPerks() {
 
 */
 
+ // Hook #1: load all perks when component mounts
+  useEffect(() => {
+    loadAllPerks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Hook #2: auto-search (debounced) when searchQuery or merchantFilter changes
+  useEffect(() => {
+    // debounce to avoid excessive requests while typing
+    const id = setTimeout(() => {
+      loadAllPerks()
+    }, 500)
+
+    return () => clearTimeout(id)
+    // deliberately depend on searchQuery and merchantFilter
+  }, [searchQuery, merchantFilter])
+
+  
   
   useEffect(() => {
     // Extract all merchant names from perks array
@@ -47,7 +65,6 @@ export default function AllPerks() {
     // This effect depends on [perks], so it re-runs whenever perks changes
   }, [perks]) // Dependency: re-run when perks array changes
 
-  
   async function loadAllPerks() {
     // Reset error state before new request
     setError('')
@@ -136,7 +153,8 @@ export default function AllPerks() {
                 type="text"
                 className="input"
                 placeholder="Enter perk name..."
-                
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
               />
               <p className="text-xs text-zinc-500 mt-1">
                 Auto-searches as you type, or press Enter / click Search
@@ -151,7 +169,8 @@ export default function AllPerks() {
               </label>
               <select
                 className="input"
-                
+                value={merchantFilter}
+                onChange={e => setMerchantFilter(e.target.value)}
               >
                 <option value="">All Merchants</option>
                 
@@ -217,7 +236,7 @@ export default function AllPerks() {
           
           <Link
             key={perk._id}
-           
+            to={`/perks/${perk._id}`}
             className="card hover:shadow-lg transition-shadow cursor-pointer"
           >
             {/* Perk Title */}
